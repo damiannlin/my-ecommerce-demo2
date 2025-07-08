@@ -120,10 +120,11 @@
   <!-- 聊天元件按鈕 + 容器 -->
   <button id="chat-widget-button">💬</button>
   <div id="chat-widget-container">
-    <div id="chat-widget-header">
-      <span>🤖 AI Assistant</span>
-      <button id="chat-widget-close">✖</button>
-    </div>
+<div id="chat-widget-header">
+  <span>🤖 AI Assistant</span>
+  <!-- 移除 inline onclick，加上 id 讓 JS 綁定 -->
+  <button id="chat-widget-close">✖</button>
+</div>
     <div id="chat-widget-body">
       <div class="bot-message chat-message">
         <div>
