@@ -163,6 +163,14 @@
         line-height: 1.4;
       }
       
+      /* 支援 n8n 返回的 HTML 內容 */
+      .bot-message img {
+        max-width: 100%;
+        height: auto;
+        border-radius: 8px;
+        margin: 8px 0;
+      }
+      
       .bot-message p {
         margin: 0 0 8px 0;
       }
@@ -399,8 +407,8 @@
         div.innerHTML = `<span>${escapeHtml(msg.content)}</span>`;
       } else {
         const wrapper = document.createElement('div');
-        // 使用格式化函數處理產品顯示
-        wrapper.innerHTML = formatProductDisplay(msg.content);
+        // 直接使用原始內容，不進行額外的格式化
+        wrapper.innerHTML = msg.content;
         div.appendChild(wrapper);
       }
       
