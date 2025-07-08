@@ -1,293 +1,78 @@
 <!DOCTYPE html>
 <html lang="zh-Hant">
 <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-    <title>E-Commerce Demo Store - AI Chatbot Showcase</title>
-    <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #f5f5f5; color: #333; }
-        header { background: #854fff; color: white; padding: 1rem 0; box-shadow: 0 2px 10px rgba(0,0,0,0.1); position: sticky; top: 0; z-index: 100; }
-        .container { max-width: 1200px; margin: 0 auto; padding: 0 20px; }
-        nav { display: flex; justify-content: space-between; align-items: center; }
-        .logo { font-size: 24px; font-weight: bold; }
-        .nav-links { display: flex; gap: 30px; list-style: none; }
-        .nav-links a { color: white; text-decoration: none; transition: opacity 0.3s; }
-        .nav-links a:hover { opacity: 0.8; }
-
-        .hero { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 80px 0; text-align: center; }
-        .hero h1 { font-size: 48px; margin-bottom: 20px; animation: fadeInUp 0.8s ease; }
-        .hero p { font-size: 20px; opacity: 0.9; animation: fadeInUp 0.8s ease 0.2s; animation-fill-mode: backwards; }
-
-        .products { padding: 60px 0; }
-        .section-title { text-align: center; font-size: 36px; margin-bottom: 50px; color: #333; }
-        .products-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 30px; margin-bottom: 40px; }
-        .product-card { background: white; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 15px rgba(0,0,0,0.08); transition: transform 0.3s, box-shadow 0.3s; }
-        .product-card:hover { transform: translateY(-5px); box-shadow: 0 8px 25px rgba(0,0,0,0.15); }
-        .product-image { width: 100%; height: 250px; object-fit: contain; background: #f9f9f9; padding: 20px; }
-        .product-info { padding: 20px; }
-        .product-title { font-size: 18px; margin-bottom: 10px; color: #333; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
-        .product-price { font-size: 24px; font-weight: bold; color: #854fff; margin-bottom: 15px; }
-        .product-rating { color: #ff9800; font-size: 14px; margin-bottom: 15px; }
-        .btn-primary { background: #854fff; color: white; border: none; padding: 10px 20px; border-radius: 25px; font-size: 14px; font-weight: bold; cursor: pointer; transition: all 0.3s; width: 100%; }
-        .btn-primary:hover { background: #6b3fd4; transform: scale(1.05); }
-
-        .chat-section { background: #f0f4ff; padding: 60px 0; text-align: center; }
-        .chat-demo { background: white; border-radius: 20px; padding: 40px; max-width: 600px; margin: 0 auto; box-shadow: 0 10px 30px rgba(0,0,0,0.1); }
-
-        footer { background: #333; color: white; padding: 40px 0; text-align: center; }
-
-        @keyframes fadeInUp { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
-
-        /* Chat Widget Styles */
-        #chat-widget-button {
-            position: fixed; bottom: 20px; right: 20px;
-            background: #854fff; color: white; border: none;
-            width: 60px; height: 60px; border-radius: 50%;
-            cursor: pointer; font-size: 24px; z-index: 1001;
-            display: flex; align-items: center; justify-content: center;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.3); transition: all 0.3s;
-        }
-        #chat-widget-button:hover { transform: scale(1.1); box-shadow: 0 6px 15px rgba(0,0,0,0.4); }
-
-        #chat-widget-container {
-            position: fixed; bottom: 20px; right: 20px;
-            width: 350px; height: 500px;
-            background: #fff; border-radius: 12px;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.2);
-            display: none; flex-direction: column; z-index: 1000; overflow: hidden;
-        }
-        #chat-widget-header { background: #854fff; color: white; padding: 16px; display: flex; justify-content: space-between; align-items: center; }
-        #chat-widget-header button { background: none; border: none; color: white; font-size: 20px; cursor: pointer; }
-        #chat-widget-body { flex: 1; padding: 12px; overflow-y: auto; background: #f9f9f9; }
-        .chat-message { margin: 8px 0; }
-        .user-message span { background: #e3f2fd; padding: 8px 12px; border-radius: 16px 16px 4px 16px; display: inline-block; max-width: 80%; }
-        .bot-message div { background: #854fff; color: white; padding: 10px 14px; border-radius: 16px 16px 16px 4px; display: inline-block; max-width: 85%; }
-        .bot-message img {
-            max-width: 100%;
-            max-height: 120px;
-            display: block;
-            margin: 12px auto 0 auto;
-            border-radius: 8px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-        }
-        #chat-widget-footer { padding: 8px; border-top: 1px solid #ddd; display: flex; gap: 6px; background: white; }
-        #chat-widget-input { flex: 1; padding: 8px 12px; border: 1px solid #ddd; border-radius: 20px; outline: none; }
-        #chat-widget-send { background: #854fff; color: white; border: none; padding: 8px 16px; border-radius: 20px; cursor: pointer; }
-    </style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Demo Store</title>
+  <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
-    <!-- Header -->
-    <header>
-        <div class="container">
-            <nav>
-                <div class="logo">🛍️ Demo Store</div>
-                <ul class="nav-links">
-                    <li><a href="#home">Home</a></li>
-                    <li><a href="#products">Products</a></li>
-                    <li><a href="#about">About</a></li>
-                    <li><a href="#contact">Contact</a></li>
-                </ul>
-            </nav>
-        </div>
-    </header>
-
-    <!-- Hero Section -->
-    <section class="hero" id="home">
-        <div class="container">
-            <h1>Welcome to Our Demo Store</h1>
-            <p>Experience the power of AI-powered customer service</p>
-            <p style="margin-top: 20px; font-size: 16px; opacity: 0.8;">
-                💬 Click the chat button in the bottom right to try our AI assistant!
-            </p>
-        </div>
-    </section>
-
-    <!-- Products Section -->
-    <section class="products" id="products">
-        <div class="container">
-            <h2 class="section-title">Featured Products</h2>
-            <div id="products-container">
-                <div class="loading">
-                    <div class="spinner"></div>
-                    <p>Loading products...</p>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- Chat Demo Section -->
-    <section class="chat-section">
-        <div class="container">
-            <h2 class="section-title">AI Chatbot Features</h2>
-            <div class="chat-demo">
-                <h3 style="margin-bottom: 20px; color: #854fff;">Try asking our chatbot:</h3>
-                <ul style="text-align: left; list-style: none; line-height: 2;">
-                    <li>✨ "Show me electronics"</li>
-                    <li>✨ "I'm looking for a laptop"</li>
-                    <li>✨ "What products do you have under $50?"</li>
-                    <li>✨ "顯示所有產品" (Multi-language support!)</li>
-                    <li>✨ "I need help with my order"</li>
-                    <li>✨ "Can I speak to a human?"</li>
-                </ul>
-            </div>
-        </div>
-    </section>
-
-    <!-- Footer -->
-    <footer>
-        <div class="container">
-            <p>&copy; 2024 Demo Store. Powered by n8n Chatbot</p>
-            <p style="margin-top: 10px; opacity: 0.7;">This is a demonstration website using Fake Store API</p>
-        </div>
-    </footer>
-
-    <!-- Chat Widget Button -->
-    <button id="chat-widget-button">💬</button>
-
-    <!-- Chat Widget Container -->
-    <div id="chat-widget-container">
-        <div id="chat-widget-header">
-            <span>🤖 AI Shopping Assistant</span>
-            <button onclick="closeChatWidget()">✖</button>
-        </div>
-        <div id="chat-widget-body">
-            <div class="bot-message chat-message">
-                <div>
-                    <strong>Hi 👋 Welcome to our Demo Store!</strong><br><br>
-                    I'm your AI shopping assistant. How can I help you today?
-                </div>
-            </div>
-        </div>
-        <div id="chat-widget-footer">
-            <input type="text" id="chat-widget-input" placeholder="Type your message here..." />
-            <button id="chat-widget-send">Send</button>
-        </div>
+  <!-- Header + Nav -->
+  <header>
+    <div class="container">
+      <nav>
+        <div class="logo">🛍️ Demo Store</div>
+        <ul class="nav-links">
+          <li><a href="index.html">Home</a></li>
+          <li><a href="about.html">About</a></li>
+          <li><a href="faq.html">Help Center</a></li>
+          <li><a href="shipping.html">Shipping & Returns</a></li>
+          <li><a href="terms.html">Terms & Conditions</a></li>
+          <li><a href="contact.html">Contact</a></li>
+        </ul>
+      </nav>
     </div>
+  </header>
 
-    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+  <!-- Hero -->
+  <section class="hero">
+    <div class="container">
+      <h1>Welcome to Our Demo Store</h1>
+      <p>Experience the power of AI-powered customer service</p>
+    </div>
+  </section>
 
-    <!-- Load products from Fake Store API -->
-    <script>
-        async function loadProducts() {
-            try {
-                const response = await fetch('https://fakestoreapi.com/products?limit=8');
-                const products = await response.json();
-                const container = document.getElementById('products-container');
-                container.innerHTML = '<div class="products-grid">' +
-                    products.map(product => \`
-                        <div class="product-card">
-                            <img src="\${product.image}" alt="\${product.title}" class="product-image">
-                            <div class="product-info">
-                                <h3 class="product-title">\${product.title}</h3>
-                                <div class="product-price">$\${product.price.toFixed(2)}</div>
-                                <div class="product-rating">
-                                    \${'⭐'.repeat(Math.round(product.rating.rate))} 
-                                    \${product.rating.rate}/5 (\${product.rating.count} reviews)
-                                </div>
-                                <button class="btn-primary" onclick="alert('Chat with our AI assistant to learn more about this product!')">
-                                    View Details
-                                </button>
-                            </div>
-                        </div>
-                    \`).join('') +
-                '</div>';
-            } catch (error) {
-                console.error('Error loading products:', error);
-                document.getElementById('products-container').innerHTML =
-                    '<p style="text-align: center; color: #666;">Error loading products. Please refresh the page.</p>';
-            }
-        }
-        window.addEventListener('DOMContentLoaded', loadProducts);
-    </script>
+  <!-- Products -->
+  <section class="products">
+    <div class="container">
+      <h2>Featured Products</h2>
+      <div id="products-container">Loading products…</div>
+    </div>
+  </section>
 
-    <!-- n8n Chat Widget Integration -->
-    <script>
-        window.ChatWidgetConfig = {
-            webhook: {
-                url: 'https://proxy.cors.sh/https://damiannstudio.app.n8n.cloud/webhook/f4b34c09-655e-4fee-8593-825a3000fcec/chat',
-                route: 'general'
-            }
-        };
+  <!-- Footer -->
+  <footer>
+    <div class="container">
+      <p>&copy; 2024 Demo Store</p>
+    </div>
+  </footer>
 
-        function getChatId() {
-            let cid = sessionStorage.getItem('chatId');
-            if (!cid) {
-                cid = 'chat_' + Math.random().toString(36).slice(2, 11);
-                sessionStorage.setItem('chatId', cid);
-            }
-            return cid;
-        }
+  <!-- Chat Widget -->
+  <button id="chat-widget-button">💬</button>
+  <div id="chat-widget-container"></div>
 
-        const chatBtn = document.getElementById('chat-widget-button');
-        const chatContainer = document.getElementById('chat-widget-container');
-        chatBtn.addEventListener('click', () => {
-            chatContainer.style.display = 'flex';
-            chatBtn.style.display = 'none';
-            document.getElementById('chat-widget-input').focus();
-        });
-        function closeChatWidget() {
-            chatContainer.style.display = 'none';
-            chatBtn.style.display = 'flex';
-        }
-
-        async function sendMessage() {
-            const inputEl = document.getElementById('chat-widget-input');
-            const msg = inputEl.value.trim();
-            if (!msg) return;
-            const bodyEl = document.getElementById('chat-widget-body');
-
-            const um = document.createElement('div');
-            um.className = 'user-message chat-message';
-            um.innerHTML = \`<span>\${msg}</span>\`;
-            bodyEl.appendChild(um);
-
-            const lm = document.createElement('div');
-            lm.id = '__loading';
-            lm.className = 'bot-message chat-message';
-            lm.innerHTML = \`<div>Thinking...</div>\`;
-            bodyEl.appendChild(lm);
-            bodyEl.scrollTop = bodyEl.scrollHeight;
-
-            try {
-                const res = await fetch(window.ChatWidgetConfig.webhook.url, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'x-cors-api-key': 'live_6ed1988eef69805095b983da8425845588a78d58a8183e8bf26e028268bd4d47'
-                    },
-                    body: JSON.stringify({
-                        chatId: getChatId(),
-                        sessionId: getChatId(),
-                        message: msg,
-                        route: window.ChatWidgetConfig.webhook.route
-                    })
-                });
-                const data = await res.json();
-                const loadingEl = document.getElementById('__loading');
-                if (loadingEl) loadingEl.remove();
-                const reply = data.output || data.response || data.text || '抱歉，出錯了。';
-                const bm = document.createElement('div');
-                bm.className = 'bot-message chat-message';
-                bm.innerHTML = \`<div>\${marked.parse(reply)}</div>\`;
-                bodyEl.appendChild(bm);
-                bodyEl.scrollTop = bodyEl.scrollHeight;
-            } catch (e) {
-                const loadingEl = document.getElementById('__loading');
-                if (loadingEl) loadingEl.remove();
-                const err = document.createElement('div');
-                err.className = 'bot-message chat-message';
-                err.innerHTML = '<div>連線失敗，請稍後再試。</div>';
-                bodyEl.appendChild(err);
-            }
-
-            inputEl.value = '';
-        }
-
-        document.getElementById('chat-widget-send').addEventListener('click', sendMessage);
-        document.getElementById('chat-widget-input').addEventListener('keypress', e => {
-            if (e.key === 'Enter') sendMessage();
-        });
-    </script>
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+  <script src="chat-widget.js"></script>
+  <script>
+    // 載入產品
+    async function loadProducts() {
+      const res = await fetch('https://fakestoreapi.com/products');
+      const list = await res.json();
+      const container = document.getElementById('products-container');
+      container.innerHTML = '<div class="grid">'+
+        list.map(p => `
+          <div class="card">
+            <a href="product.html?id=${p.id}">
+              <img src="${p.image}" alt="${p.title}"/>
+              <h3>${p.title}</h3>
+              <p>$${p.price.toFixed(2)}</p>
+            </a>
+          </div>
+        `).join('') +
+      '</div>';
+    }
+    window.addEventListener('DOMContentLoaded', loadProducts);
+  </script>
 </body>
 </html>
+
