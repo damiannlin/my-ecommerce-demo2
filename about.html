@@ -1,28 +1,29 @@
 <!DOCTYPE html>
-<html lang="zh-Hant">
+<html lang="en">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>關於我們 | Demo Store</title>
+  <title>About Us | Demo Store</title>
   <style>
-    /* 請將這段複製到 styles.css */
+    /* Common styles (move into styles.css if you have one) */
     * { margin:0; padding:0; box-sizing:border-box; }
     body { font-family: -apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif; background:#f5f5f5; color:#333; line-height:1.6; }
     header, footer { background:#854fff; color:#fff; padding:1rem 0; }
     .container { max-width:1200px; margin:0 auto; padding:0 20px; }
     nav { display:flex; justify-content:space-between; align-items:center; }
-    .logo { font-size:24px; }
+    .logo { font-size:24px; font-weight:bold; }
     .nav-links { list-style:none; display:flex; gap:20px; }
     .nav-links a { color:#fff; text-decoration:none; }
     h1 { margin:2rem 0 1rem; color:#854fff; text-align:center; }
     .content { background:#fff; padding:2rem; border-radius:8px; box-shadow:0 2px 10px rgba(0,0,0,0.1); }
-    .content p { margin-bottom:1rem; }
+    .content p, .content ul { margin-bottom:1rem; }
+    .content ul { list-style: disc; padding-left:1.5rem; }
     footer p { text-align:center; color:#eee; }
-    #chat-widget-button, #chat-widget-container { /* 同 chat-widget.js 樣式 */ }
+    /* Chat widget placeholder styles (import from chat-widget.js) */
   </style>
 </head>
 <body>
-  <!-- Header + Nav -->
+  <!-- Header + Navigation -->
   <header>
     <div class="container">
       <nav>
@@ -32,32 +33,32 @@
           <li><a href="about.html">About</a></li>
           <li><a href="faq.html">Help Center</a></li>
           <li><a href="shipping.html">Shipping & Returns</a></li>
-          <li><a href="terms.html">Terms</a></li>
+          <li><a href="terms.html">Terms & Conditions</a></li>
           <li><a href="contact.html">Contact</a></li>
         </ul>
       </nav>
     </div>
   </header>
 
-  <!-- About Content -->
+  <!-- Main Content -->
   <main class="container">
-    <h1>關於我們</h1>
+    <h1>About Us</h1>
     <div class="content">
-      <p><strong>Demo Store</strong> 成立於 2023 年，宗旨為結合最先進的 AI 技術，為您帶來全新的線上購物體驗。我們的團隊涵蓋電子商務、UX 設計、AI 研發等多元背景，致力於打造快速、智慧、貼心的購物流程。</p>
+      <p><strong>Demo Store</strong> was founded in 2023 to harness cutting-edge AI technology and deliver a next-generation online shopping experience. Our multidisciplinary team includes e-commerce professionals, UX designers, and AI researchers committed to crafting a fast, intelligent, and empathetic buying journey.</p>
       
-      <h2>我們的願景</h2>
-      <p>在數位時代，消費者期待更個人化、更即時的服務。Demo Store 透過 AI 聊天機器人，隨時回答您的問題，並根據偏好推薦商品，讓您不用出門也能享受如同專屬客服般的購物體驗。</p>
+      <h2>Our Vision</h2>
+      <p>In today’s digital landscape, shoppers expect personalized, on-demand service. Demo Store’s AI chatbot is available around the clock to answer questions and recommend products based on your preferences—bringing you the feel of a dedicated personal assistant from the comfort of home.</p>
       
-      <h2>核心價值</h2>
+      <h2>Core Values</h2>
       <ul>
-        <li><strong>創新</strong>：不斷追求技術突破，將 AI 與購物完美結合。</li>
-        <li><strong>品質</strong>：與全球優質品牌合作，嚴格把關商品來源。</li>
-        <li><strong>服務</strong>：24/7 全天候線上客服，任何疑問即時回覆。</li>
-        <li><strong>安心</strong>：採用最高等級的 SSL 加密與隱私保護機制。</li>
+        <li><strong>Innovation</strong>: Continuously pushing technological boundaries by integrating AI and commerce.</li>
+        <li><strong>Quality</strong>: Partnering with top global brands and rigorously vetting every item.</li>
+        <li><strong>Service</strong>: Providing 24/7 live online support to address your needs instantly.</li>
+        <li><strong>Trust</strong>: Utilizing industry-leading SSL encryption and privacy safeguards.</li>
       </ul>
       
-      <h2>團隊介紹</h2>
-      <p>我們是一群熱愛電商與 AI 的工程師、設計師與產品經理，皆來自知名科技與電商公司，具有多年研發與上線經驗。期待透過 Demo Store，為全球消費者提供更智慧、更貼心的購物服務。</p>
+      <h2>Our Team</h2>
+      <p>We are a passionate group of engineers, designers, and product managers with backgrounds at leading tech and retail organizations. Together, we aim to revolutionize e-commerce and deliver a smarter, more empathetic shopping experience worldwide.</p>
     </div>
   </main>
 
@@ -68,7 +69,7 @@
     </div>
   </footer>
 
-  <!-- Chat Widget -->
+  <!-- Chat Widget Elements -->
   <button id="chat-widget-button">💬</button>
   <div id="chat-widget-container"></div>
   <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
