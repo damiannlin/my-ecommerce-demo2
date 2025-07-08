@@ -356,31 +356,8 @@
           const priceMatch = line.match(/\$?([\d.]+)/);
           if (priceMatch) currentProduct.details.price = '
 
-  // 創建產品卡片（簡化版）
-  function createProductCard(product) {
-    let html = '<div style="margin: 8px 0; padding: 12px; background: #f9fafb; border-radius: 8px; border: 1px solid #e5e7eb;">';
-    
-    // 產品標題
-    html += `<div style="font-weight: 600; color: #111827; margin-bottom: 8px;">${product.title}</div>`;
-    
-    // 產品詳情
-    if (product.details.price) {
-      html += `<div style="color: #854fff; font-weight: 700; font-size: 18px; margin-bottom: 4px;">${product.details.price}</div>`;
-    }
-    if (product.details.category) {
-      html += `<div style="color: #6b7280; font-size: 13px; margin-bottom: 4px;">📦 ${product.details.category}</div>`;
-    }
-    if (product.details.rating) {
-      html += `<div style="color: #f59e0b; font-size: 13px; margin-bottom: 4px;">${product.details.rating}</div>`;
-    }
-    if (product.details.link) {
-      html += `<a href="${product.details.link.url}" target="_blank" style="display: inline-block; margin-top: 8px; color: #854fff; font-size: 13px; text-decoration: none;">${product.details.link.text} →</a>`;
-    }
-    
-    html += '</div>';
-    return html;
-  }
-
+  // 刪除不需要的函數
+  
   // 渲染歷史記錄
   function renderHistory() {
     const body = document.getElementById('chat-widget-body');
