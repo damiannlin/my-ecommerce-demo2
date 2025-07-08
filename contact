@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>聯絡我們 | Demo Store</title>
+  <style>
+    /* 同 about.html 內的 styles.css */
+  </style>
+</head>
+<body>
+  <!-- Header + Nav 同上 -->
+
+  <main class="container">
+    <h1>聯絡我們</h1>
+    <div class="content">
+      <h2>客服信箱</h2>
+      <p>若有任何問題，請寄信至 <a href="mailto:support@demostore.com">support@demostore.com</a>，我們將於 24 小時內回覆。</p>
+      
+      <h2>電話客服</h2>
+      <p>週一至週五 09:00–18:00<br>
+         電話：<a href="tel:+886-2-1234-5678">+886-2-1234-5678</a></p>
+      
+      <h2>公司地址</h2>
+      <p>Demo Store 總部<br>
+         台北市信義區信義路五段7號12樓</p>
+      
+      <h2>即時聊天</h2>
+      <p>點擊右下角聊天按鈕，24/7 AI 客服為您服務。</p>
+    </div>
+  </main>
+
+  <!-- Footer & Chat Widget 同上 -->
+  <footer>…</footer>
+  <button id="chat-widget-button">💬</button>
+  <div id="chat-widget-container"></div>
+  <script src="marked/marked.min.js"></script>
+  <script src="chat-widget.js"></script>
+</body>
+</html>
