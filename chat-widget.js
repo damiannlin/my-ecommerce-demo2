@@ -1,451 +1,172 @@
-// chat-widget.js - 完整修復版
-
-(function() {
-  // 配置
-  const CONFIG = {
+/* File: chat-widget.js */
+(function(){
+  // n8n Chat Widget Config
+  window.ChatWidgetConfig = {
     webhook: {
-      url: 'https://damiannstudio.app.n8n.cloud/webhook/f4b34c09-655e-4fee-8593-825a3000fcec/chat',
-      corsProxy: 'https://proxy.cors.sh/',
-      apiKey: 'live_6ed1988eef69805095b983da8425845588a78d58a8183e8bf26e028268bd4d47'
-    },
-    storage: {
-      chatId: 'demo_store_chat_id',
-      history: 'demo_store_chat_history'
+      url: 'https://proxy.cors.sh/https://damiannstudio.app.n8n.cloud/webhook/f4b34c09-655e-4fee-8593-825a3000fcec/chat',
+      route: 'general'
     }
   };
 
-  // 獲取或生成唯一的聊天 ID
   function getChatId() {
-    let chatId = localStorage.getItem(CONFIG.storage.chatId);
-    if (!chatId) {
-      chatId = 'chat_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
-      localStorage.setItem(CONFIG.storage.chatId, chatId);
+    let cid = sessionStorage.getItem('chatId');
+    if (!cid) {
+      cid = 'chat_' + Math.random().toString(36).slice(2, 11);
+      sessionStorage.setItem('chatId', cid);
     }
-    return chatId;
+    return cid;
   }
 
-  // 讀取聊天記錄
-  function loadHistory() {
-    const raw = localStorage.getItem(CONFIG.storage.history);
-    try {
-      return raw ? JSON.parse(raw) : [];
-    } catch {
-      return [];
-    }
-  }
-
-  // 保存聊天記錄
-  function saveHistory(history) {
-    localStorage.setItem(CONFIG.storage.history, JSON.stringify(history));
-  }
-
-  // 創建聊天視窗 HTML
-  function createChatWidget() {
-    // 檢查是否已存在
-    if (document.getElementById('chat-widget-button')) {
-      return;
+  // 等待 DOM 載入完成
+  function initChat() {
+    // 動態創建聊天按鈕和容器
+    if (!document.getElementById('chat-widget-button')) {
+      const button = document.createElement('button');
+      button.id = 'chat-widget-button';
+      button.innerHTML = '💬';
+      button.style.cssText = 'position: fixed; bottom: 20px; right: 20px; width: 60px; height: 60px; background: #854fff; color: white; border: none; border-radius: 50%; cursor: pointer; font-size: 24px; z-index: 1001; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 10px rgba(0,0,0,0.3); transition: all 0.3s;';
+      document.body.appendChild(button);
     }
 
-    // 創建按鈕
-    const button = document.createElement('button');
-    button.id = 'chat-widget-button';
-    button.innerHTML = '💬';
-    button.style.cssText = `
-      position: fixed; bottom: 20px; right: 20px;
-      width: 60px; height: 60px; border-radius: 50%;
-      background: #854fff; color: white; border: none;
-      font-size: 24px; cursor: pointer; z-index: 1001;
-      display: flex; align-items: center; justify-content: center;
-      box-shadow: 0 4px 10px rgba(0,0,0,0.3);
-      transition: all 0.3s;
-    `;
-
-    // 創建聊天容器
-    const container = document.createElement('div');
-    container.id = 'chat-widget-container';
-    container.style.cssText = `
-      position: fixed; bottom: 20px; right: 20px;
-      width: 380px; height: 600px;
-      background: white; border-radius: 16px;
-      box-shadow: 0 4px 24px rgba(0,0,0,0.15);
-      display: none; flex-direction: column;
-      z-index: 1000; overflow: hidden;
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-    `;
-
-    container.innerHTML = `
-      <div id="chat-widget-header" style="background: #854fff; color: white; padding: 20px; display: flex; justify-content: space-between; align-items: center; border-radius: 16px 16px 0 0;">
-        <span style="font-weight: 600; font-size: 18px; display: flex; align-items: center; gap: 8px;">
-          <span style="font-size: 24px;">🤖</span> AI Assistant
-        </span>
-        <button id="chat-widget-close" style="background: rgba(255,255,255,0.2); border: none; color: white; font-size: 20px; cursor: pointer; width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; transition: all 0.2s;">✕</button>
-      </div>
-      <div id="chat-widget-body" style="flex: 1; padding: 16px; overflow-y: auto; background: #f8f9fa;">
-        <div class="bot-message chat-message">
-          <div style="background: white; color: #1f2937; padding: 12px 16px; border-radius: 18px 18px 18px 4px; display: inline-block; max-width: 85%; box-shadow: 0 1px 2px rgba(0,0,0,0.1);">
-            <strong>Hi 👋 Welcome to Demo Store!</strong><br><br>
-            I'm your AI shopping assistant. How can I help you today?
+    if (!document.getElementById('chat-widget-container')) {
+      const container = document.createElement('div');
+      container.id = 'chat-widget-container';
+      container.style.cssText = 'position: fixed; bottom: 20px; right: 20px; width: 350px; height: 500px; background: #fff; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.2); display: none; flex-direction: column; z-index: 1000; overflow: hidden;';
+      container.innerHTML = `
+        <div id="chat-widget-header" style="background: #854fff; color: white; padding: 16px; display: flex; justify-content: space-between; align-items: center;">
+          <span>🤖 AI Shopping Assistant</span>
+          <button onclick="closeChatWidget()" style="background: none; border: none; color: white; font-size: 20px; cursor: pointer;">✖</button>
+        </div>
+        <div id="chat-widget-body" style="flex: 1; padding: 12px; overflow-y: auto; background: #f9f9f9;">
+          <div class="bot-message chat-message">
+            <div><strong>Hi 👋 Welcome to our Demo Store!</strong><br><br>I'm your AI shopping assistant. How can I help you today?</div>
           </div>
         </div>
-      </div>
-      <div id="chat-widget-footer" style="padding: 16px; border-top: 1px solid #e5e7eb; background: white; border-radius: 0 0 16px 16px;">
-        <div style="display: flex; gap: 8px; align-items: center;">
-          <input id="chat-widget-input" placeholder="Type a message..." style="flex: 1; padding: 12px 16px; border: 1px solid #e5e7eb; border-radius: 24px; outline: none; font-size: 14px; transition: border 0.2s;" />
-          <button id="chat-widget-send" style="background: #854fff; color: white; border: none; padding: 12px 20px; border-radius: 24px; cursor: pointer; font-weight: 500; transition: all 0.2s;">Send</button>
+        <div id="chat-widget-footer" style="padding: 8px; border-top: 1px solid #ddd; display: flex; gap: 6px; background: white;">
+          <input type="text" id="chat-widget-input" placeholder="Type your message here..." style="flex: 1; padding: 8px 12px; border: 1px solid #ddd; border-radius: 20px; outline: none;" />
+          <button id="chat-widget-send" style="background: #854fff; color: white; border: none; padding: 8px 16px; border-radius: 20px; cursor: pointer;">Send</button>
         </div>
-      </div>
-    `;
-
-    // 加入樣式
-    const style = document.createElement('style');
-    style.textContent = `
-      #chat-widget-button:hover { 
-        transform: scale(1.1); 
-        box-shadow: 0 6px 20px rgba(133, 79, 255, 0.4); 
-      }
-      
-      #chat-widget-close:hover { 
-        background: rgba(255,255,255,0.3) !important; 
-      }
-      
-      #chat-widget-input:focus { 
-        border-color: #854fff !important; 
-      }
-      
-      #chat-widget-send:hover { 
-        background: #6b3fd4 !important; 
-        transform: scale(1.02);
-      }
-      
-      #chat-widget-send:active { 
-        transform: scale(0.98);
-      }
-      
-      .chat-message { 
-        margin: 12px 0; 
-        animation: fadeIn 0.3s ease;
-      }
-      
-      @keyframes fadeIn {
-        from { opacity: 0; transform: translateY(10px); }
-        to { opacity: 1; transform: translateY(0); }
-      }
-      
-      .user-message { 
-        text-align: right; 
-      }
-      
-      .user-message span { 
-        background: #854fff;
-        color: white;
-        padding: 12px 16px;
-        border-radius: 18px 18px 4px 18px;
-        display: inline-block;
-        max-width: 75%;
-        word-wrap: break-word;
-        font-size: 14px;
-        line-height: 1.5;
-      }
-      
-      .bot-message { 
-        text-align: left; 
-      }
-      
-      .bot-message > div { 
-        background: white;
-        color: #1f2937;
-        padding: 12px 16px;
-        border-radius: 18px 18px 18px 4px;
-        display: inline-block;
-        max-width: 85%;
-        box-shadow: 0 1px 2px rgba(0,0,0,0.1);
-        font-size: 14px;
-        line-height: 1.4;
-      }
-      
-      /* 支援 n8n 返回的 HTML 內容 */
-      .bot-message img {
-        max-width: 100%;
-        height: auto;
-        border-radius: 8px;
-        margin: 8px 0;
-      }
-      
-      .bot-message p {
-        margin: 0 0 8px 0;
-      }
-      
-      .bot-message p:last-child {
-        margin-bottom: 0;
-      }
-      
-      .bot-message strong {
-        color: #111827;
-      }
-      
-      .bot-message a { 
-        color: #854fff;
-        text-decoration: none;
-        font-weight: 500;
-        border-bottom: 1px solid transparent;
-        transition: border-color 0.2s;
-      }
-      
-      .bot-message a:hover {
-        border-bottom-color: #854fff;
-      }
-      
-      /* 載入動畫 */
-      .typing-indicator {
-        display: inline-flex;
-        align-items: center;
-        padding: 12px 16px;
-        background: white;
-        border-radius: 18px 18px 18px 4px;
-        box-shadow: 0 1px 2px rgba(0,0,0,0.1);
-      }
-      
-      .typing-indicator span {
-        height: 8px;
-        width: 8px;
-        background: #854fff;
-        border-radius: 50%;
-        display: inline-block;
-        margin: 0 2px;
-        animation: typing 1.4s infinite ease-in-out;
-      }
-      
-      .typing-indicator span:nth-child(1) { animation-delay: -0.32s; }
-      .typing-indicator span:nth-child(2) { animation-delay: -0.16s; }
-      .typing-indicator span:nth-child(3) { animation-delay: 0s; }
-      
-      @keyframes typing {
-        0%, 80%, 100% {
-          transform: scale(0.8);
-          opacity: 0.5;
-        }
-        40% {
-          transform: scale(1);
-          opacity: 1;
-        }
-      }
-      
-      /* 捲軸樣式 */
-      #chat-widget-body::-webkit-scrollbar {
-        width: 6px;
-      }
-      
-      #chat-widget-body::-webkit-scrollbar-track {
-        background: transparent;
-      }
-      
-      #chat-widget-body::-webkit-scrollbar-thumb {
-        background: #d1d5db;
-        border-radius: 3px;
-      }
-      
-      #chat-widget-body::-webkit-scrollbar-thumb:hover {
-        background: #9ca3af;
-      }
-    `;
-
-    document.head.appendChild(style);
-    document.body.appendChild(button);
-    document.body.appendChild(container);
-  }
-
-  // 渲染歷史記錄
-  function renderHistory() {
-    const body = document.getElementById('chat-widget-body');
-    if (!body) return;
-
-    const history = loadHistory();
-    
-    // 保留歡迎訊息
-    body.innerHTML = `
-      <div class="bot-message chat-message">
-        <div style="background: white; color: #1f2937; padding: 12px 16px; border-radius: 18px 18px 18px 4px; display: inline-block; max-width: 85%; box-shadow: 0 1px 2px rgba(0,0,0,0.1);">
-          <strong>Hi 👋 Welcome to Demo Store!</strong><br><br>
-          I'm your AI shopping assistant. How can I help you today?
-        </div>
-      </div>
-    `;
-
-    // 添加歷史訊息
-    history.forEach(msg => {
-      const div = document.createElement('div');
-      div.className = `chat-message ${msg.role === 'user' ? 'user-message' : 'bot-message'}`;
-      
-      if (msg.role === 'user') {
-        div.innerHTML = `<span>${escapeHtml(msg.content)}</span>`;
-      } else {
-        const wrapper = document.createElement('div');
-        // 直接使用原始內容，保留 n8n 的 HTML 格式
-        wrapper.innerHTML = msg.content;
-        div.appendChild(wrapper);
-      }
-      
-      body.appendChild(div);
-    });
-
-    body.scrollTop = body.scrollHeight;
-  }
-
-  // HTML 轉義
-  function escapeHtml(text) {
-    const div = document.createElement('div');
-    div.textContent = text;
-    return div.innerHTML;
-  }
-
-  // 添加訊息
-  function appendMessage(role, content) {
-    const history = loadHistory();
-    history.push({ role, content, timestamp: new Date().toISOString() });
-    
-    // 限制歷史記錄數量（保留最近 50 條）
-    if (history.length > 50) {
-      history.splice(0, history.length - 50);
+      `;
+      document.body.appendChild(container);
     }
+
+    // 添加基本樣式
+    if (!document.getElementById('chat-widget-styles')) {
+      const styles = document.createElement('style');
+      styles.id = 'chat-widget-styles';
+      styles.textContent = `
+        #chat-widget-button:hover { transform: scale(1.1); box-shadow: 0 6px 15px rgba(0,0,0,0.4); }
+        .chat-message { margin: 8px 0; }
+        .user-message { text-align: right; }
+        .user-message span { background: #e3f2fd; color: #333; padding: 8px 12px; border-radius: 16px 16px 4px 16px; display: inline-block; max-width: 80%; }
+        .bot-message { text-align: left; }
+        .bot-message div { background: #854fff; color: white; padding: 10px 14px; border-radius: 16px 16px 16px 4px; display: inline-block; max-width: 85%; }
+        .bot-message img { max-width: 100%; max-height: 200px; display: block; margin: 12px 0; border-radius: 8px; }
+        .bot-message a { color: #fff; text-decoration: underline; }
+      `;
+      document.head.appendChild(styles);
+    }
+
+    // 開／關 chat 視窗
+    const chatBtn = document.getElementById('chat-widget-button');
+    const chatContainer = document.getElementById('chat-widget-container');
     
-    saveHistory(history);
-    renderHistory();
+    chatBtn.addEventListener('click', () => {
+      chatContainer.style.display = 'flex';
+      chatBtn.style.display = 'none';
+      document.getElementById('chat-widget-input').focus();
+    });
   }
 
-  // 開啟聊天
-  function openChat() {
-    const button = document.getElementById('chat-widget-button');
-    const container = document.getElementById('chat-widget-container');
-    const input = document.getElementById('chat-widget-input');
-    
-    if (button) button.style.display = 'none';
-    if (container) container.style.display = 'flex';
-    if (input) input.focus();
-    
-    renderHistory();
-  }
+  window.closeChatWidget = function() {
+    document.getElementById('chat-widget-container').style.display = 'none';
+    document.getElementById('chat-widget-button').style.display = 'flex';
+  };
 
-  // 關閉聊天
-  function closeChat() {
-    const button = document.getElementById('chat-widget-button');
-    const container = document.getElementById('chat-widget-container');
-    
-    if (button) button.style.display = 'flex';
-    if (container) container.style.display = 'none';
-  }
-
-  // 發送訊息
+  // 傳訊 & 顯示回覆
   async function sendMessage() {
-    const input = document.getElementById('chat-widget-input');
-    const body = document.getElementById('chat-widget-body');
-    const sendBtn = document.getElementById('chat-widget-send');
-    
-    if (!input || !body) return;
-    
-    const text = input.value.trim();
-    if (!text) return;
-    
-    input.value = '';
-    input.disabled = true;
-    sendBtn.disabled = true;
-    
-    // 添加用戶訊息
-    appendMessage('user', text);
-    
-    // 添加載入動畫
-    const loadingDiv = document.createElement('div');
-    loadingDiv.id = '__loading';
-    loadingDiv.className = 'bot-message chat-message';
-    loadingDiv.innerHTML = `
-      <div class="typing-indicator">
-        <span></span>
-        <span></span>
-        <span></span>
-      </div>
-    `;
-    body.appendChild(loadingDiv);
-    body.scrollTop = body.scrollHeight;
-    
+    const inputEl = document.getElementById('chat-widget-input');
+    const msg = inputEl.value.trim();
+    if (!msg) return;
+    const bodyEl = document.getElementById('chat-widget-body');
+
+    // 使用者訊息
+    const um = document.createElement('div');
+    um.className = 'user-message chat-message';
+    um.innerHTML = `<span>${msg}</span>`;
+    bodyEl.appendChild(um);
+
+    // Loading
+    const lm = document.createElement('div');
+    lm.id = '__loading';
+    lm.className = 'bot-message chat-message';
+    lm.innerHTML = `<div>Thinking...</div>`;
+    bodyEl.appendChild(lm);
+    bodyEl.scrollTop = bodyEl.scrollHeight;
+
     try {
-      // 決定是否使用 CORS proxy
-      let fetchUrl = CONFIG.webhook.url;
-      const headers = {
-        'Content-Type': 'application/json'
-      };
-      
-      // 如果是從 file:// 或需要 CORS proxy
-      if (window.location.protocol === 'file:' || window.location.hostname === 'localhost') {
-        fetchUrl = CONFIG.webhook.corsProxy + CONFIG.webhook.url;
-        headers['x-cors-api-key'] = CONFIG.webhook.apiKey;
-      }
-      
-      const response = await fetch(fetchUrl, {
+      const res = await fetch(window.ChatWidgetConfig.webhook.url, {
         method: 'POST',
-        headers: headers,
+        headers: {
+          'Content-Type': 'application/json',
+          'x-cors-api-key': 'live_6ed1988eef69805095b983da8425845588a78d58a8183e8bf26e028268bd4d47'
+        },
         body: JSON.stringify({
           chatId: getChatId(),
           sessionId: getChatId(),
-          message: text,
-          route: 'general'
+          message: msg,
+          route: window.ChatWidgetConfig.webhook.route
         })
       });
+      const data = await res.json();
+      document.getElementById('__loading')?.remove();
       
-      const data = await response.json();
+      const reply = data.output || data.response || data.text || '抱歉，出錯了。';
+      const bm = document.createElement('div');
+      bm.className = 'bot-message chat-message';
       
-      // 移除載入動畫
-      const loading = document.getElementById('__loading');
-      if (loading) loading.remove();
+      // 如果回覆包含 HTML（來自 n8n），直接使用；否則用 marked 解析
+      if (reply.includes('<div') || reply.includes('<img')) {
+        bm.innerHTML = `<div>${reply}</div>`;
+      } else if (typeof marked !== 'undefined') {
+        bm.innerHTML = `<div>${marked.parse(reply)}</div>`;
+      } else {
+        bm.innerHTML = `<div>${reply}</div>`;
+      }
       
-      // 添加回覆
-      const reply = data.output || data.response || data.text || 'Sorry, I encountered an error. Please try again.';
-      appendMessage('bot', reply);
-      
-    } catch (error) {
-      console.error('Chat error:', error);
-      
-      // 移除載入動畫
-      const loading = document.getElementById('__loading');
-      if (loading) loading.remove();
-      
-      // 添加錯誤訊息
-      appendMessage('bot', 'Sorry, I\'m having connection issues. Please try again later.');
+      bodyEl.appendChild(bm);
+      bodyEl.scrollTop = bodyEl.scrollHeight;
+    } catch (e) {
+      document.getElementById('__loading')?.remove();
+      const err = document.createElement('div');
+      err.className = 'bot-message chat-message';
+      err.innerHTML = `<div>連線失敗，請稍後再試。</div>`;
+      bodyEl.appendChild(err);
     }
-    
-    input.disabled = false;
-    sendBtn.disabled = false;
-    input.focus();
+
+    inputEl.value = '';
   }
 
-  // 初始化
-  function init() {
-    // 等待 DOM 載入
-    if (document.readyState === 'loading') {
-      document.addEventListener('DOMContentLoaded', init);
-      return;
+  // 等待 DOM 載入完成後初始化
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initChat);
+  } else {
+    initChat();
+  }
+
+  // 確保事件綁定
+  document.addEventListener('DOMContentLoaded', () => {
+    const sendBtn = document.getElementById('chat-widget-send');
+    const inputEl = document.getElementById('chat-widget-input');
+    
+    if (sendBtn) {
+      sendBtn.addEventListener('click', sendMessage);
     }
     
-    // 創建聊天元件
-    createChatWidget();
-    
-    // 綁定事件
-    const button = document.getElementById('chat-widget-button');
-    const closeBtn = document.getElementById('chat-widget-close');
-    const sendBtn = document.getElementById('chat-widget-send');
-    const input = document.getElementById('chat-widget-input');
-    
-    if (button) button.addEventListener('click', openChat);
-    if (closeBtn) closeBtn.addEventListener('click', closeChat);
-    if (sendBtn) sendBtn.addEventListener('click', sendMessage);
-    if (input) {
-      input.addEventListener('keypress', (e) => {
-        if (e.key === 'Enter' && !e.shiftKey) {
-          e.preventDefault();
-          sendMessage();
-        }
+    if (inputEl) {
+      inputEl.addEventListener('keypress', e => { 
+        if (e.key === 'Enter') sendMessage(); 
       });
     }
-  }
-
-  // 啟動
-  init();
+  });
 })();
