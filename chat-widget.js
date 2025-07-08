@@ -160,7 +160,15 @@
         max-width: 85%;
         box-shadow: 0 1px 2px rgba(0,0,0,0.1);
         font-size: 14px;
-        line-height: 1.6;
+        line-height: 1.4;
+      }
+      
+      .bot-message p {
+        margin: 0 0 8px 0;
+      }
+      
+      .bot-message p:last-child {
+        margin-bottom: 0;
       }
       
       .bot-message strong {
@@ -247,14 +255,14 @@
         align-items: center;
         padding: 12px 16px;
         background: white;
-        border-radius: 18px;
+        border-radius: 18px 18px 18px 4px;
         box-shadow: 0 1px 2px rgba(0,0,0,0.1);
       }
       
       .typing-indicator span {
         height: 8px;
         width: 8px;
-        background: #9ca3af;
+        background: #854fff;
         border-radius: 50%;
         display: inline-block;
         margin: 0 2px;
@@ -263,14 +271,15 @@
       
       .typing-indicator span:nth-child(1) { animation-delay: -0.32s; }
       .typing-indicator span:nth-child(2) { animation-delay: -0.16s; }
+      .typing-indicator span:nth-child(3) { animation-delay: 0s; }
       
       @keyframes typing {
-        0%, 60%, 100% {
-          transform: translateY(0);
-          opacity: 0.7;
+        0%, 80%, 100% {
+          transform: scale(0.8);
+          opacity: 0.5;
         }
-        30% {
-          transform: translateY(-10px);
+        40% {
+          transform: scale(1);
           opacity: 1;
         }
       }
@@ -299,49 +308,282 @@
     document.body.appendChild(container);
   }
 
-  // 處理產品顯示格式
+  // 處理產品顯示格式（支援圖片）
   function formatProductDisplay(text) {
+    // 先檢查是否有 HTML 結構（從 n8n 返回的格式化內容）
+    if (text.includes('<div') || text.includes('<img')) {
+      return text;
+    }
+    
     // 檢查是否包含產品資訊格式
-    const lines = text.split('\n');
+    const lines = text.split('\n').filter(line => line.trim());
     let formattedHtml = '';
-    let inProductSection = false;
     let currentProduct = null;
+    let regularText = '';
 
-    lines.forEach(line => {
+    lines.forEach((line, index) => {
       // 檢測產品標題（例如：**1. Product Name**）
       const productMatch = line.match(/^\*?\*?(\d+)\.\s+(.+?)\*?\*?$/);
+      
       if (productMatch) {
+        // 先處理之前的普通文字
+        if (regularText) {
+          formattedHtml += `<p>${marked.parseInline(regularText)}</p>`;
+          regularText = '';
+        }
+        
+        // 保存之前的產品
         if (currentProduct) {
           formattedHtml += createProductCard(currentProduct);
         }
+        
         currentProduct = {
-          title: productMatch[2].replace(/\*/g, ''),
-          details: []
+          title: productMatch[2].replace(/\*/g, '').trim(),
+          details: {}
         };
-        inProductSection = true;
       }
       // 檢測產品詳情
-      else if (inProductSection && line.trim()) {
+      else if (currentProduct && line.trim()) {
         if (line.includes('💰') || line.includes('Price:') || line.includes('價格:')) {
           const priceMatch = line.match(/\$?([\d.]+)/);
-          if (priceMatch) currentProduct.price = '$' + priceMatch[1];
+          if (priceMatch) currentProduct.details.price = '
+
+  // 創建產品卡片（簡化版）
+  function createProductCard(product) {
+    let html = '<div style="margin: 8px 0; padding: 12px; background: #f9fafb; border-radius: 8px; border: 1px solid #e5e7eb;">';
+    
+    // 產品標題
+    html += `<div style="font-weight: 600; color: #111827; margin-bottom: 8px;">${product.title}</div>`;
+    
+    // 產品詳情
+    if (product.details.price) {
+      html += `<div style="color: #854fff; font-weight: 700; font-size: 18px; margin-bottom: 4px;">${product.details.price}</div>`;
+    }
+    if (product.details.category) {
+      html += `<div style="color: #6b7280; font-size: 13px; margin-bottom: 4px;">📦 ${product.details.category}</div>`;
+    }
+    if (product.details.rating) {
+      html += `<div style="color: #f59e0b; font-size: 13px; margin-bottom: 4px;">${product.details.rating}</div>`;
+    }
+    if (product.details.link) {
+      html += `<a href="${product.details.link.url}" target="_blank" style="display: inline-block; margin-top: 8px; color: #854fff; font-size: 13px; text-decoration: none;">${product.details.link.text} →</a>`;
+    }
+    
+    html += '</div>';
+    return html;
+  }
+
+  // 渲染歷史記錄
+  function renderHistory() {
+    const body = document.getElementById('chat-widget-body');
+    if (!body) return;
+
+    const history = loadHistory();
+    
+    // 保留歡迎訊息
+    body.innerHTML = `
+      <div class="bot-message chat-message">
+        <div>
+          <strong>Hi 👋 Welcome to Demo Store!</strong><br><br>
+          I'm your AI shopping assistant. How can I help you today?
+        </div>
+      </div>
+    `;
+
+    // 添加歷史訊息
+    history.forEach(msg => {
+      const div = document.createElement('div');
+      div.className = `chat-message ${msg.role === 'user' ? 'user-message' : 'bot-message'}`;
+      
+      if (msg.role === 'user') {
+        div.innerHTML = `<span>${escapeHtml(msg.content)}</span>`;
+      } else {
+        const wrapper = document.createElement('div');
+        // 使用格式化函數處理產品顯示
+        wrapper.innerHTML = formatProductDisplay(msg.content);
+        div.appendChild(wrapper);
+      }
+      
+      body.appendChild(div);
+    });
+
+    body.scrollTop = body.scrollHeight;
+  }
+
+  // HTML 轉義
+  function escapeHtml(text) {
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
+  }
+
+  // 添加訊息
+  function appendMessage(role, content) {
+    const history = loadHistory();
+    history.push({ role, content, timestamp: new Date().toISOString() });
+    
+    // 限制歷史記錄數量（保留最近 50 條）
+    if (history.length > 50) {
+      history.splice(0, history.length - 50);
+    }
+    
+    saveHistory(history);
+    renderHistory();
+  }
+
+  // 開啟聊天
+  function openChat() {
+    const button = document.getElementById('chat-widget-button');
+    const container = document.getElementById('chat-widget-container');
+    const input = document.getElementById('chat-widget-input');
+    
+    if (button) button.style.display = 'none';
+    if (container) container.style.display = 'flex';
+    if (input) input.focus();
+    
+    renderHistory();
+  }
+
+  // 關閉聊天
+  function closeChat() {
+    const button = document.getElementById('chat-widget-button');
+    const container = document.getElementById('chat-widget-container');
+    
+    if (button) button.style.display = 'flex';
+    if (container) container.style.display = 'none';
+  }
+
+  // 發送訊息
+  async function sendMessage() {
+    const input = document.getElementById('chat-widget-input');
+    const body = document.getElementById('chat-widget-body');
+    const sendBtn = document.getElementById('chat-widget-send');
+    
+    if (!input || !body) return;
+    
+    const text = input.value.trim();
+    if (!text) return;
+    
+    input.value = '';
+    input.disabled = true;
+    sendBtn.disabled = true;
+    
+    // 添加用戶訊息
+    appendMessage('user', text);
+    
+    // 添加載入動畫
+    const loadingDiv = document.createElement('div');
+    loadingDiv.id = '__loading';
+    loadingDiv.className = 'bot-message chat-message';
+    loadingDiv.innerHTML = `
+      <div class="typing-indicator">
+        <span></span>
+        <span></span>
+        <span></span>
+      </div>
+    `;
+    body.appendChild(loadingDiv);
+    body.scrollTop = body.scrollHeight;
+    
+    try {
+      // 決定是否使用 CORS proxy
+      let fetchUrl = CONFIG.webhook.url;
+      const headers = {
+        'Content-Type': 'application/json'
+      };
+      
+      // 如果是從 file:// 或需要 CORS proxy
+      if (window.location.protocol === 'file:' || window.location.hostname === 'localhost') {
+        fetchUrl = CONFIG.webhook.corsProxy + CONFIG.webhook.url;
+        headers['x-cors-api-key'] = CONFIG.webhook.apiKey;
+      }
+      
+      const response = await fetch(fetchUrl, {
+        method: 'POST',
+        headers: headers,
+        body: JSON.stringify({
+          chatId: getChatId(),
+          sessionId: getChatId(),
+          message: text,
+          route: 'general'
+        })
+      });
+      
+      const data = await response.json();
+      
+      // 移除載入動畫
+      const loading = document.getElementById('__loading');
+      if (loading) loading.remove();
+      
+      // 添加回覆
+      const reply = data.output || data.response || data.text || 'Sorry, I encountered an error. Please try again.';
+      appendMessage('bot', reply);
+      
+    } catch (error) {
+      console.error('Chat error:', error);
+      
+      // 移除載入動畫
+      const loading = document.getElementById('__loading');
+      if (loading) loading.remove();
+      
+      // 添加錯誤訊息
+      appendMessage('bot', 'Sorry, I\'m having connection issues. Please try again later.');
+    }
+    
+    input.disabled = false;
+    sendBtn.disabled = false;
+    input.focus();
+  }
+
+  // 初始化
+  function init() {
+    // 等待 DOM 載入
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', init);
+      return;
+    }
+    
+    // 創建聊天元件
+    createChatWidget();
+    
+    // 綁定事件
+    const button = document.getElementById('chat-widget-button');
+    const closeBtn = document.getElementById('chat-widget-close');
+    const sendBtn = document.getElementById('chat-widget-send');
+    const input = document.getElementById('chat-widget-input');
+    
+    if (button) button.addEventListener('click', openChat);
+    if (closeBtn) closeBtn.addEventListener('click', closeChat);
+    if (sendBtn) sendBtn.addEventListener('click', sendMessage);
+    if (input) {
+      input.addEventListener('keypress', (e) => {
+        if (e.key === 'Enter' && !e.shiftKey) {
+          e.preventDefault();
+          sendMessage();
+        }
+      });
+    }
+  }
+
+  // 啟動
+  init();
+})(); + priceMatch[1];
         }
         else if (line.includes('📦') || line.includes('Category:') || line.includes('分類:')) {
-          currentProduct.category = line.replace(/[📦]|Category:|分類:/g, '').trim();
+          currentProduct.details.category = line.replace(/[📦💰⭐🔗]|Category:|分類:|Price:|價格:/g, '').trim();
         }
         else if (line.includes('⭐') || line.includes('Rating:') || line.includes('評分:')) {
-          currentProduct.rating = line;
+          currentProduct.details.rating = line.replace(/Rating:|評分:/g, '').trim();
         }
         else if (line.includes('🔗') || line.includes('[View Details]') || line.includes('[查看詳情]')) {
           const linkMatch = line.match(/\[([^\]]+)\]\(([^)]+)\)/);
           if (linkMatch) {
-            currentProduct.link = { text: linkMatch[1], url: linkMatch[2] };
+            currentProduct.details.link = { text: linkMatch[1], url: linkMatch[2] };
           }
         }
-        currentProduct.details.push(line);
       }
-      // 處理分隔線
-      else if (line.includes('---')) {
+      // 檢測分隔線或空行
+      else if (line.includes('---') || line.trim() === '') {
         if (currentProduct) {
           formattedHtml += createProductCard(currentProduct);
           currentProduct = null;
@@ -352,20 +594,20 @@
         if (currentProduct) {
           formattedHtml += createProductCard(currentProduct);
           currentProduct = null;
-          inProductSection = false;
         }
-        if (line.trim()) {
-          formattedHtml += `<p>${marked.parseInline(line)}</p>`;
-        }
+        regularText += (regularText ? ' ' : '') + line;
       }
     });
 
-    // 處理最後一個產品
+    // 處理最後的內容
     if (currentProduct) {
       formattedHtml += createProductCard(currentProduct);
     }
+    if (regularText) {
+      formattedHtml += `<p>${marked.parseInline(regularText)}</p>`;
+    }
 
-    return formattedHtml || marked.parse(text);
+    return formattedHtml || `<p>${marked.parseInline(text)}</p>`;
   }
 
   // 創建產品卡片
