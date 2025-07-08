@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Help Center (FAQ) | Demo Store</title>
+  <style>
+    * { margin:0; padding:0; box-sizing:border-box; }
+    body { font-family: -apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif; background:#f5f5f5; color:#333; line-height:1.6; }
+    header, footer { background:#854fff; color:#fff; padding:1rem 0; }
+    .container { max-width:1200px; margin:0 auto; padding:0 20px; }
+    nav { display:flex; justify-content:space-between; align-items:center; }
+    .logo { font-size:24px; font-weight:bold; }
+    .nav-links { list-style:none; display:flex; gap:20px; }
+    .nav-links a { color:#fff; text-decoration:none; }
+    h1 { margin:2rem 0 1rem; color:#854fff; text-align:center; }
+    .faq-item { background:#fff; padding:1rem 1.5rem; margin-bottom:1rem; border-radius:8px; box-shadow:0 2px 6px rgba(0,0,0,0.05); }
+    .faq-item h2 { font-size:18px; color:#333; margin-bottom:0.5rem; }
+    .faq-item p { margin-left:1rem; }
+    footer p { text-align:center; color:#eee; }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="container">
+      <nav>
+        <div class="logo">🛍️ Demo Store</div>
+        <ul class="nav-links">
+          <li><a href="index.html">Home</a></li>
+          <li><a href="about.html">About</a></li>
+          <li><a href="faq.html">Help Center</a></li>
+          <li><a href="shipping.html">Shipping & Returns</a></li>
+          <li><a href="terms.html">Terms & Conditions</a></li>
+          <li><a href="contact.html">Contact</a></li>
+        </ul>
+      </nav>
+    </div>
+  </header>
+
+  <main class="container">
+    <h1>Help Center (FAQ)</h1>
+
+    <div class="faq-item">
+      <h2>Q1: How do I place an order?</h2>
+      <p>To place an order, browse our product pages and click “Add to Cart.” When you’re ready, click the cart icon and follow the checkout steps, entering shipping & payment details.</p>
+    </div>
+
+    <div class="faq-item">
+      <h2>Q2: What payment methods are accepted?</h2>
+      <p>We accept major credit cards (Visa, MasterCard, American Express), PayPal, and Apple Pay.</p>
+    </div>
+
+    <div class="faq-item">
+      <h2>Q3: Can I track my shipment?</h2>
+      <p>Yes. After your order ships, you’ll receive an email with a tracking number. Use that on the carrier’s website or our “Order Status” page to track progress.</p>
+    </div>
+
+    <div class="faq-item">
+      <h2>Q4: How do I return or exchange an item?</h2>
+      <p>Please see our <a href="shipping.html">Shipping & Returns</a> page for full instructions on returns and exchanges.</p>
+    </div>
+
+    <div class="faq-item">
+      <h2>Q5: How can I contact customer support?</h2>
+      <p>You can email us at <a href="mailto:support@demostore.com">support@demostore.com</a> or use the chat button at the bottom right to talk to our AI assistant.</p>
+    </div>
+  </main>
+
+  <footer>
+    <div class="container">
+      <p>&copy; 2024 Demo Store. All rights reserved.</p>
+    </div>
+  </footer>
+
+  <!-- Chat Widget -->
+  <button id="chat-widget-button">💬</button>
+  <div id="chat-widget-container"></div>
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+  <script src="chat-widget.js"></script>
+</body>
+</html>
