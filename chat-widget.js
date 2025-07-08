@@ -1,123 +1,31 @@
 // chat-widget.js
+document.addEventListener('DOMContentLoaded', () => {
+  // -- 幫助函式：從 sessionStorage 載入已存訊息 --
+  function loadStoredMessages() {
+    try {
+      const json = sessionStorage.getItem('chatMessages');
+      return json ? JSON.parse(json) : [];
+    } catch {
+      return [];
+    }
+  }
 
-(function(){
-  // ---------- 1. 插入必要 CSS ----------
-  const style = document.createElement('style');
-  style.textContent = `
-    #chat-widget-button {
-      position: fixed;
-      bottom: 20px;
-      right: 20px;
-      background: #854fff;
-      color: #fff;
-      border: none;
-      width: 60px;
-      height: 60px;
-      border-radius: 50%;
-      font-size: 24px;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      box-shadow: 0 4px 10px rgba(0,0,0,0.3);
-      z-index: 10000;
-    }
-    #chat-widget-container {
-      position: fixed;
-      bottom: 20px;
-      right: 20px;
-      width: 350px;
-      height: 500px;
-      background: #fff;
-      border-radius: 12px;
-      box-shadow: 0 4px 20px rgba(0,0,0,0.2);
-      display: none;
-      flex-direction: column;
-      overflow: hidden;
-      z-index: 9999;
-    }
-    #chat-widget-header {
-      background: #854fff;
-      color: #fff;
-      padding: 12px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
-    #chat-widget-header button {
-      background: none;
-      border: none;
-      color: #fff;
-      font-size: 20px;
-      cursor: pointer;
-    }
-    #chat-widget-body {
-      flex: 1;
-      padding: 12px;
-      overflow-y: auto;
-      background: #f9f9f9;
-    }
-    .chat-message { margin: 8px 0; }
-    .user-message span {
-      background: #e3f2fd;
-      padding: 8px 12px;
-      border-radius: 16px 16px 4px 16px;
-      display: inline-block;
-      max-width: 80%;
-    }
-    .bot-message div {
-      background: #854fff;
-      color: #fff;
-      padding: 10px 14px;
-      border-radius: 16px 16px 16px 4px;
-      display: inline-block;
-      max-width: 85%;
-    }
-    .bot-message img {
-      max-width: 100%;
-      max-height: 120px;
-      display: block;
-      margin: 12px auto 0;
-      border-radius: 8px;
-      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-    }
-    #chat-widget-footer {
-      padding: 8px;
-      border-top: 1px solid #ddd;
-      display: flex;
-      gap: 6px;
-      background: #fff;
-    }
-    #chat-widget-input {
-      flex: 1;
-      padding: 8px 12px;
-      border: 1px solid #ddd;
-      border-radius: 20px;
-      outline: none;
-    }
-    #chat-widget-send {
-      background: #854fff;
-      color: #fff;
-      border: none;
-      padding: 8px 16px;
-      border-radius: 20px;
-      cursor: pointer;
-    }
-  `;
-  document.head.appendChild(style);
+  // -- 幫助函式：將訊息列表存回 sessionStorage --
+  function saveStoredMessages(messages) {
+    sessionStorage.setItem('chatMessages', JSON.stringify(messages));
+  }
 
-  // ---------- 2. 插入按鈕與容器到 <body> 最後 ----------
-  const btn = document.createElement('button');
-  btn.id = 'chat-widget-button';
-  btn.textContent = '💬';
-  document.body.appendChild(btn);
+  // -- 建立聊天按鈕 --
+  const chatBtn = document.createElement('button');
+  chatBtn.id = 'chat-widget-button';
+  chatBtn.textContent = '💬';
+  document.body.appendChild(chatBtn);
 
-  const container = document.createElement('div');
-  container.id = 'chat-widget-container';
-  document.body.appendChild(container);
-
-  // ---------- 3. 建立內部結構 ----------
-  container.innerHTML = `
+  // -- 建立聊天容器 --
+  const chatContainer = document.createElement('div');
+  chatContainer.id = 'chat-widget-container';
+  chatContainer.style.display = 'none';
+  chatContainer.innerHTML = `
     <div id="chat-widget-header">
       <span>🤖 AI Shopping Assistant</span>
       <button id="chat-widget-close">✖</button>
@@ -128,67 +36,67 @@
       <button id="chat-widget-send">Send</button>
     </div>
   `;
+  document.body.appendChild(chatContainer);
 
-  // ---------- 4. 顯示 / 隱藏功能 ----------
-  btn.addEventListener('click', () => {
-    container.style.display = 'flex';
-    btn.style.display = 'none';
+  // -- 載入標記工具 --
+  const markedScript = document.createElement('script');
+  markedScript.src = 'https://cdn.jsdelivr.net/npm/marked/marked.min.js';
+  document.body.appendChild(markedScript);
+
+  // -- 重新播放已存訊息到畫面上 --
+  const bodyEl = chatContainer.querySelector('#chat-widget-body');
+  let stored = loadStoredMessages();
+  stored.forEach(msg => {
+    const div = document.createElement('div');
+    div.className = msg.from === 'user' ? 'user-message chat-message' : 'bot-message chat-message';
+    if (msg.from === 'bot') {
+      div.innerHTML = `<div>${marked.parse(msg.text)}</div>`;
+    } else {
+      div.innerHTML = `<span>${msg.text}</span>`;
+    }
+    bodyEl.appendChild(div);
+  });
+  bodyEl.scrollTop = bodyEl.scrollHeight;
+
+  // -- 綁定開關按鈕事件 --
+  chatBtn.addEventListener('click', () => {
+    chatContainer.style.display = 'flex';
+    chatBtn.style.display = 'none';
     document.getElementById('chat-widget-input').focus();
-    renderHistory();  // 開啟時重建歷史
   });
-  document.getElementById('chat-widget-close').addEventListener('click', () => {
-    container.style.display = 'none';
-    btn.style.display = 'flex';
+  chatContainer.querySelector('#chat-widget-close').addEventListener('click', () => {
+    chatContainer.style.display = 'none';
+    chatBtn.style.display = 'flex';
   });
 
-  // ---------- 5. 建立唯一 chatId & 歷史紀錄storage ----------
+  // -- 生成唯一 chatId (同一分頁跨頁不變) --
   function getChatId() {
     let cid = sessionStorage.getItem('chatId');
     if (!cid) {
-      cid = 'chat_' + Math.random().toString(36).slice(2,11);
+      cid = 'chat_' + Math.random().toString(36).slice(2, 11);
       sessionStorage.setItem('chatId', cid);
     }
     return cid;
   }
-  function saveMessage(role, content) {
-    const key = getChatId() + '_history';
-    const history = JSON.parse(sessionStorage.getItem(key) || '[]');
-    history.push({ role, content });
-    sessionStorage.setItem(key, JSON.stringify(history));
-  }
-  function renderHistory() {
-    const key = getChatId() + '_history';
-    const history = JSON.parse(sessionStorage.getItem(key) || '[]');
-    const bodyEl = document.getElementById('chat-widget-body');
-    bodyEl.innerHTML = '';
-    history.forEach(msg => {
-      const div = document.createElement('div');
-      div.className = msg.role + '-message chat-message';
-      if (msg.role === 'user') {
-        div.innerHTML = `<span>${msg.content}</span>`;
-      } else {
-        div.innerHTML = `<div>${msg.content}</div>`;
-      }
-      bodyEl.appendChild(div);
-    });
-    bodyEl.scrollTop = bodyEl.scrollHeight;
-  }
 
-  // ---------- 6. 寄送訊息到 n8n 並顯示回覆 ----------
+  // -- 傳送訊息主流程 --
   async function sendMessage() {
     const inputEl = document.getElementById('chat-widget-input');
     const msg = inputEl.value.trim();
     if (!msg) return;
-    const bodyEl = document.getElementById('chat-widget-body');
 
-    // 使用者訊息
+    // 1. 清空並顯示使用者訊息
     const um = document.createElement('div');
     um.className = 'user-message chat-message';
     um.innerHTML = `<span>${msg}</span>`;
     bodyEl.appendChild(um);
-    saveMessage('user', msg);
+    bodyEl.scrollTop = bodyEl.scrollHeight;
 
-    // loading
+    // 2. 存到 sessionStorage
+    stored.push({ from: 'user', text: msg });
+    saveStoredMessages(stored);
+
+    // 3. 顯示思考中
     const lm = document.createElement('div');
     lm.id = '__loading';
     lm.className = 'bot-message chat-message';
@@ -196,12 +104,14 @@
     bodyEl.appendChild(lm);
     bodyEl.scrollTop = bodyEl.scrollHeight;
 
+    inputEl.value = '';
+
     try {
       const res = await fetch(window.ChatWidgetConfig.webhook.url, {
-        method:'POST',
-        headers:{
-          'Content-Type':'application/json',
-          'x-cors-api-key':'live_6ed1988eef69805095b983da8425845588a78d58a8183e8bf26e028268bd4d47'
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'x-cors-api-key': window.ChatWidgetConfig.webhook.corsKey
         },
         body: JSON.stringify({
           chatId: getChatId(),
@@ -216,29 +126,42 @@
       const loadingEl = document.getElementById('__loading');
       if (loadingEl) loadingEl.remove();
 
-      const reply = marked.parse(data.output||data.response||data.text||'抱歉，出錯了。');
+      // 4. 顯示機器人回覆
+      const reply = data.output || data.response || data.text || '抱歉，出錯了。';
       const bm = document.createElement('div');
       bm.className = 'bot-message chat-message';
-      bm.innerHTML = `<div>${reply}</div>`;
+      bm.innerHTML = `<div>${marked.parse(reply)}</div>`;
       bodyEl.appendChild(bm);
-      saveMessage('bot', reply);
-
       bodyEl.scrollTop = bodyEl.scrollHeight;
+
+      // 存回 sessionStorage
+      stored.push({ from: 'bot', text: reply });
+      saveStoredMessages(stored);
     } catch (e) {
+      // 移除 loading
       const loadingEl = document.getElementById('__loading');
       if (loadingEl) loadingEl.remove();
+
+      // 顯示錯誤訊息
       const err = document.createElement('div');
       err.className = 'bot-message chat-message';
       err.innerHTML = `<div>連線失敗，請稍後再試。</div>`;
       bodyEl.appendChild(err);
-      saveMessage('bot', '連線失敗，請稍後再試。');
+      bodyEl.scrollTop = bodyEl.scrollHeight;
     }
-    inputEl.value = '';
   }
 
-  document.getElementById('chat-widget-send').addEventListener('click', sendMessage);
-  document.getElementById('chat-widget-input').addEventListener('keypress', e => {
-    if (e.key==='Enter') sendMessage();
-  });
+  // -- 綁定送出事件 --
+  chatContainer.querySelector('#chat-widget-send').addEventListener('click', sendMessage);
+  chatContainer.querySelector('#chat-widget-input')
+    .addEventListener('keypress', e => { if (e.key === 'Enter') sendMessage(); });
 
-})();
+  // -- 暴露給 About 等頁面的設定參數 --
+  window.ChatWidgetConfig = {
+    webhook: {
+      url: 'https://proxy.cors.sh/https://damiannstudio.app.n8n.cloud/webhook/f4b34c09-655e-4fee-8593-825a3000fcec/chat',
+      route: 'general',
+      corsKey: 'live_6ed1988eef69805095b983da8425845588a78d58a8183e8bf26e028268bd4d47'
+    }
+  };
+});
