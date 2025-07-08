@@ -138,8 +138,7 @@
     </div>
   </div>
 
-  <!-- 先載 marked，再載 chat-widget.js -->
-  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
-  <script src="chat-widget.js"></script>
-</body>
-</html>
+    <!-- 先載入標記工具，再載入聊天元件 -->
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <!-- 一定要在 loadProducts 之後，再加上 chat-widget.js -->
+    <script src="chat-widget.js"></script>
