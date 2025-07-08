@@ -19,7 +19,7 @@
     .content p, .content ul { margin-bottom:1rem; }
     .content ul { list-style: disc; padding-left:1.5rem; }
     footer p { text-align:center; color:#eee; }
-    /* Chat widget placeholder styles (import from chat-widget.js) */
+    /* Chat widget styles 已經在 chat-widget.js 裡插入，這裡不用再寫 */
   </style>
 </head>
 <body>
@@ -69,9 +69,28 @@
     </div>
   </footer>
 
-  <!-- Chat Widget Elements -->
+  <!-- Chat Widget Elements（一定要跟 index.html 一樣完整）-->
   <button id="chat-widget-button">💬</button>
-  <div id="chat-widget-container"></div>
+  <div id="chat-widget-container">
+    <div id="chat-widget-header">
+      <span>🤖 AI Shopping Assistant</span>
+      <button onclick="closeChatWidget()">✖</button>
+    </div>
+    <div id="chat-widget-body">
+      <div class="bot-message chat-message">
+        <div>
+          <strong>Hi 👋 Welcome to Demo Store!</strong><br><br>
+          How can I help you today?
+        </div>
+      </div>
+    </div>
+    <div id="chat-widget-footer">
+      <input type="text" id="chat-widget-input" placeholder="Type your message here..." />
+      <button id="chat-widget-send">Send</button>
+    </div>
+  </div>
+
+  <!-- 載入 Marked.js 及 Chat Widget 腳本 -->
   <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
   <script src="chat-widget.js"></script>
 </body>
