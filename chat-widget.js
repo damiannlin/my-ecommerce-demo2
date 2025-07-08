@@ -1,4 +1,4 @@
-// chat-widget.js - 增強版（修復格式和圖片顯示）
+// chat-widget.js - 完整修復版
 
 (function() {
   // 配置
@@ -82,7 +82,7 @@
       </div>
       <div id="chat-widget-body" style="flex: 1; padding: 16px; overflow-y: auto; background: #f8f9fa;">
         <div class="bot-message chat-message">
-          <div>
+          <div style="background: white; color: #1f2937; padding: 12px 16px; border-radius: 18px 18px 18px 4px; display: inline-block; max-width: 85%; box-shadow: 0 1px 2px rgba(0,0,0,0.1);">
             <strong>Hi 👋 Welcome to Demo Store!</strong><br><br>
             I'm your AI shopping assistant. How can I help you today?
           </div>
@@ -195,68 +195,6 @@
         border-bottom-color: #854fff;
       }
       
-      /* 產品卡片樣式 */
-      .product-card {
-        background: #f3f4f6;
-        border-radius: 12px;
-        padding: 12px;
-        margin: 8px 0;
-        border: 1px solid #e5e7eb;
-      }
-      
-      .product-card img {
-        width: 80px;
-        height: 80px;
-        object-fit: contain;
-        border-radius: 8px;
-        background: white;
-        padding: 8px;
-        float: left;
-        margin-right: 12px;
-        box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-      }
-      
-      .product-info {
-        overflow: hidden;
-      }
-      
-      .product-title {
-        font-weight: 600;
-        color: #111827;
-        font-size: 14px;
-        margin-bottom: 4px;
-        display: -webkit-box;
-        -webkit-line-clamp: 2;
-        -webkit-box-orient: vertical;
-        overflow: hidden;
-      }
-      
-      .product-price {
-        color: #854fff;
-        font-weight: 700;
-        font-size: 16px;
-        margin-bottom: 4px;
-      }
-      
-      .product-category {
-        color: #6b7280;
-        font-size: 12px;
-        margin-bottom: 4px;
-      }
-      
-      .product-rating {
-        color: #f59e0b;
-        font-size: 12px;
-      }
-      
-      .product-link {
-        display: inline-block;
-        margin-top: 8px;
-        color: #854fff;
-        font-size: 13px;
-        font-weight: 500;
-      }
-      
       /* 載入動畫 */
       .typing-indicator {
         display: inline-flex;
@@ -316,48 +254,6 @@
     document.body.appendChild(container);
   }
 
-  // 處理產品顯示格式（支援圖片）
-  function formatProductDisplay(text) {
-    // 先檢查是否有 HTML 結構（從 n8n 返回的格式化內容）
-    if (text.includes('<div') || text.includes('<img')) {
-      return text;
-    }
-    
-    // 檢查是否包含產品資訊格式
-    const lines = text.split('\n').filter(line => line.trim());
-    let formattedHtml = '';
-    let currentProduct = null;
-    let regularText = '';
-
-    lines.forEach((line, index) => {
-      // 檢測產品標題（例如：**1. Product Name**）
-      const productMatch = line.match(/^\*?\*?(\d+)\.\s+(.+?)\*?\*?$/);
-      
-      if (productMatch) {
-        // 先處理之前的普通文字
-        if (regularText) {
-          formattedHtml += `<p>${marked.parseInline(regularText)}</p>`;
-          regularText = '';
-        }
-        
-        // 保存之前的產品
-        if (currentProduct) {
-          formattedHtml += createProductCard(currentProduct);
-        }
-        
-        currentProduct = {
-          title: productMatch[2].replace(/\*/g, '').trim(),
-          details: {}
-        };
-      }
-      // 檢測產品詳情
-      else if (currentProduct && line.trim()) {
-        if (line.includes('💰') || line.includes('Price:') || line.includes('價格:')) {
-          const priceMatch = line.match(/\$?([\d.]+)/);
-          if (priceMatch) currentProduct.details.price = '
-
-  // 刪除不需要的函數
-  
   // 渲染歷史記錄
   function renderHistory() {
     const body = document.getElementById('chat-widget-body');
@@ -368,7 +264,7 @@
     // 保留歡迎訊息
     body.innerHTML = `
       <div class="bot-message chat-message">
-        <div>
+        <div style="background: white; color: #1f2937; padding: 12px 16px; border-radius: 18px 18px 18px 4px; display: inline-block; max-width: 85%; box-shadow: 0 1px 2px rgba(0,0,0,0.1);">
           <strong>Hi 👋 Welcome to Demo Store!</strong><br><br>
           I'm your AI shopping assistant. How can I help you today?
         </div>
@@ -384,260 +280,8 @@
         div.innerHTML = `<span>${escapeHtml(msg.content)}</span>`;
       } else {
         const wrapper = document.createElement('div');
-        // 直接使用原始內容，不進行額外的格式化
+        // 直接使用原始內容，保留 n8n 的 HTML 格式
         wrapper.innerHTML = msg.content;
-        div.appendChild(wrapper);
-      }
-      
-      body.appendChild(div);
-    });
-
-    body.scrollTop = body.scrollHeight;
-  }
-
-  // HTML 轉義
-  function escapeHtml(text) {
-    const div = document.createElement('div');
-    div.textContent = text;
-    return div.innerHTML;
-  }
-
-  // 添加訊息
-  function appendMessage(role, content) {
-    const history = loadHistory();
-    history.push({ role, content, timestamp: new Date().toISOString() });
-    
-    // 限制歷史記錄數量（保留最近 50 條）
-    if (history.length > 50) {
-      history.splice(0, history.length - 50);
-    }
-    
-    saveHistory(history);
-    renderHistory();
-  }
-
-  // 開啟聊天
-  function openChat() {
-    const button = document.getElementById('chat-widget-button');
-    const container = document.getElementById('chat-widget-container');
-    const input = document.getElementById('chat-widget-input');
-    
-    if (button) button.style.display = 'none';
-    if (container) container.style.display = 'flex';
-    if (input) input.focus();
-    
-    renderHistory();
-  }
-
-  // 關閉聊天
-  function closeChat() {
-    const button = document.getElementById('chat-widget-button');
-    const container = document.getElementById('chat-widget-container');
-    
-    if (button) button.style.display = 'flex';
-    if (container) container.style.display = 'none';
-  }
-
-  // 發送訊息
-  async function sendMessage() {
-    const input = document.getElementById('chat-widget-input');
-    const body = document.getElementById('chat-widget-body');
-    const sendBtn = document.getElementById('chat-widget-send');
-    
-    if (!input || !body) return;
-    
-    const text = input.value.trim();
-    if (!text) return;
-    
-    input.value = '';
-    input.disabled = true;
-    sendBtn.disabled = true;
-    
-    // 添加用戶訊息
-    appendMessage('user', text);
-    
-    // 添加載入動畫
-    const loadingDiv = document.createElement('div');
-    loadingDiv.id = '__loading';
-    loadingDiv.className = 'bot-message chat-message';
-    loadingDiv.innerHTML = `
-      <div class="typing-indicator">
-        <span></span>
-        <span></span>
-        <span></span>
-      </div>
-    `;
-    body.appendChild(loadingDiv);
-    body.scrollTop = body.scrollHeight;
-    
-    try {
-      // 決定是否使用 CORS proxy
-      let fetchUrl = CONFIG.webhook.url;
-      const headers = {
-        'Content-Type': 'application/json'
-      };
-      
-      // 如果是從 file:// 或需要 CORS proxy
-      if (window.location.protocol === 'file:' || window.location.hostname === 'localhost') {
-        fetchUrl = CONFIG.webhook.corsProxy + CONFIG.webhook.url;
-        headers['x-cors-api-key'] = CONFIG.webhook.apiKey;
-      }
-      
-      const response = await fetch(fetchUrl, {
-        method: 'POST',
-        headers: headers,
-        body: JSON.stringify({
-          chatId: getChatId(),
-          sessionId: getChatId(),
-          message: text,
-          route: 'general'
-        })
-      });
-      
-      const data = await response.json();
-      
-      // 移除載入動畫
-      const loading = document.getElementById('__loading');
-      if (loading) loading.remove();
-      
-      // 添加回覆
-      const reply = data.output || data.response || data.text || 'Sorry, I encountered an error. Please try again.';
-      appendMessage('bot', reply);
-      
-    } catch (error) {
-      console.error('Chat error:', error);
-      
-      // 移除載入動畫
-      const loading = document.getElementById('__loading');
-      if (loading) loading.remove();
-      
-      // 添加錯誤訊息
-      appendMessage('bot', 'Sorry, I\'m having connection issues. Please try again later.');
-    }
-    
-    input.disabled = false;
-    sendBtn.disabled = false;
-    input.focus();
-  }
-
-  // 初始化
-  function init() {
-    // 等待 DOM 載入
-    if (document.readyState === 'loading') {
-      document.addEventListener('DOMContentLoaded', init);
-      return;
-    }
-    
-    // 創建聊天元件
-    createChatWidget();
-    
-    // 綁定事件
-    const button = document.getElementById('chat-widget-button');
-    const closeBtn = document.getElementById('chat-widget-close');
-    const sendBtn = document.getElementById('chat-widget-send');
-    const input = document.getElementById('chat-widget-input');
-    
-    if (button) button.addEventListener('click', openChat);
-    if (closeBtn) closeBtn.addEventListener('click', closeChat);
-    if (sendBtn) sendBtn.addEventListener('click', sendMessage);
-    if (input) {
-      input.addEventListener('keypress', (e) => {
-        if (e.key === 'Enter' && !e.shiftKey) {
-          e.preventDefault();
-          sendMessage();
-        }
-      });
-    }
-  }
-
-  // 啟動
-  init();
-})(); + priceMatch[1];
-        }
-        else if (line.includes('📦') || line.includes('Category:') || line.includes('分類:')) {
-          currentProduct.details.category = line.replace(/[📦💰⭐🔗]|Category:|分類:|Price:|價格:/g, '').trim();
-        }
-        else if (line.includes('⭐') || line.includes('Rating:') || line.includes('評分:')) {
-          currentProduct.details.rating = line.replace(/Rating:|評分:/g, '').trim();
-        }
-        else if (line.includes('🔗') || line.includes('[View Details]') || line.includes('[查看詳情]')) {
-          const linkMatch = line.match(/\[([^\]]+)\]\(([^)]+)\)/);
-          if (linkMatch) {
-            currentProduct.details.link = { text: linkMatch[1], url: linkMatch[2] };
-          }
-        }
-      }
-      // 檢測分隔線或空行
-      else if (line.includes('---') || line.trim() === '') {
-        if (currentProduct) {
-          formattedHtml += createProductCard(currentProduct);
-          currentProduct = null;
-        }
-      }
-      // 普通文字
-      else {
-        if (currentProduct) {
-          formattedHtml += createProductCard(currentProduct);
-          currentProduct = null;
-        }
-        regularText += (regularText ? ' ' : '') + line;
-      }
-    });
-
-    // 處理最後的內容
-    if (currentProduct) {
-      formattedHtml += createProductCard(currentProduct);
-    }
-    if (regularText) {
-      formattedHtml += `<p>${marked.parseInline(regularText)}</p>`;
-    }
-
-    return formattedHtml || `<p>${marked.parseInline(text)}</p>`;
-  }
-
-  // 創建產品卡片
-  function createProductCard(product) {
-    return `
-      <div class="product-card">
-        <div class="product-info">
-          <div class="product-title">${product.title}</div>
-          ${product.price ? `<div class="product-price">${product.price}</div>` : ''}
-          ${product.category ? `<div class="product-category">${product.category}</div>` : ''}
-          ${product.rating ? `<div class="product-rating">${product.rating}</div>` : ''}
-          ${product.link ? `<a href="${product.link.url}" target="_blank" class="product-link">${product.link.text} →</a>` : ''}
-        </div>
-      </div>
-    `;
-  }
-
-  // 渲染歷史記錄
-  function renderHistory() {
-    const body = document.getElementById('chat-widget-body');
-    if (!body) return;
-
-    const history = loadHistory();
-    
-    // 保留歡迎訊息
-    body.innerHTML = `
-      <div class="bot-message chat-message">
-        <div>
-          <strong>Hi 👋 Welcome to Demo Store!</strong><br><br>
-          I'm your AI shopping assistant. How can I help you today?
-        </div>
-      </div>
-    `;
-
-    // 添加歷史訊息
-    history.forEach(msg => {
-      const div = document.createElement('div');
-      div.className = `chat-message ${msg.role === 'user' ? 'user-message' : 'bot-message'}`;
-      
-      if (msg.role === 'user') {
-        div.innerHTML = `<span>${escapeHtml(msg.content)}</span>`;
-      } else {
-        const wrapper = document.createElement('div');
-        // 使用格式化函數處理產品顯示
-        wrapper.innerHTML = formatProductDisplay(msg.content);
         div.appendChild(wrapper);
       }
       
