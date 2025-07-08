@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Product Details</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <header>…同 index.html…</header>
+
+  <section class="product-detail">
+    <div class="container" id="product-detail">Loading…</div>
+  </section>
+
+  <footer>…同 index.html…</footer>
+
+  <button id="chat-widget-button">💬</button>
+  <div id="chat-widget-container"></div>
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+  <script src="chat-widget.js"></script>
+  <script>
+    // 取 URL id
+    const params = new URLSearchParams(location.search);
+    const id = params.get('id');
+    async function loadDetail() {
+      const res = await fetch(`https://fakestoreapi.com/products/${id}`);
+      const p = await res.json();
+      document.getElementById('product-detail').innerHTML = `
+        <img src="${p.image}" alt="${p.title}"/>
+        <h1>${p.title}</h1>
+        <p>$${p.price.toFixed(2)}</p>
+        <p>${p.description}</p>
+        <button onclick="alert('Add to cart!')">Add to Cart</button>
+      `;
+    }
+    window.addEventListener('DOMContentLoaded', loadDetail);
+  </script>
+</body>
+</html>
