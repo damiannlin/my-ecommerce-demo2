@@ -38,7 +38,7 @@
     footer{background:#333;color:#fff;padding:40px 0;text-align:center;}
     @keyframes fadeInUp{from{opacity:0;transform:translateY(30px);}to{opacity:1;transform:translateY(0);}}
 
-    /* Chat Widget */
+    /* Chat Widget 樣式 */
     #chat-widget-button{position:fixed;bottom:20px;right:20px;width:60px;height:60px;background:#854fff;color:#fff;border:none;border-radius:50%;cursor:pointer;font-size:24px;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 10px rgba(0,0,0,.3);z-index:1001;transition:all .3s;}
     #chat-widget-button:hover{transform:scale(1.1);box-shadow:0 6px 15px rgba(0,0,0,.4);}
     #chat-widget-container{position:fixed;bottom:20px;right:20px;width:350px;height:500px;background:#fff;border-radius:12px;box-shadow:0 4px 20px rgba(0,0,0,.2);display:none;flex-direction:column;z-index:1000;overflow:hidden;}
@@ -73,7 +73,7 @@
   </header>
 
   <!-- Hero -->
-  <section class="hero" id="home">
+  <section class="hero">
     <div class="container">
       <h1>Welcome to Our Demo Store</h1>
       <p>Experience the power of AI-powered customer service</p>
@@ -82,7 +82,7 @@
   </section>
 
   <!-- Products -->
-  <section class="products" id="products">
+  <section class="products">
     <div class="container">
       <h2 class="section-title">Featured Products</h2>
       <div id="products-container">
@@ -91,7 +91,7 @@
     </div>
   </section>
 
-  <!-- Chat Demo -->
+  <!-- Chat Demo Section -->
   <section class="chat-section">
     <div class="container">
       <h2 class="section-title">AI Chatbot Features</h2>
@@ -101,7 +101,7 @@
           <li>✨ "Show me electronics"</li>
           <li>✨ "I'm looking for a laptop"</li>
           <li>✨ "What products under $50?"</li>
-          <li>✨ "显示所有产品" (Multi-language!)</li>
+          <li>✨ "顯示所有產品" (Multi-language!)</li>
           <li>✨ "I need help with my order"</li>
           <li>✨ "Can I speak to a human?"</li>
         </ul>
@@ -117,12 +117,12 @@
     </div>
   </footer>
 
-  <!-- Chat Widget Elements -->
+  <!-- 聊天元件按鈕 + 容器 -->
   <button id="chat-widget-button">💬</button>
   <div id="chat-widget-container">
     <div id="chat-widget-header">
       <span>🤖 AI Assistant</span>
-      <button onclick="closeChatWidget()">✖</button>
+      <button id="chat-widget-close">✖</button>
     </div>
     <div id="chat-widget-body">
       <div class="bot-message chat-message">
@@ -138,7 +138,38 @@
     </div>
   </div>
 
-    <!-- 先載入標記工具，再載入聊天元件 -->
-    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
-    <!-- 一定要在 loadProducts 之後，再加上 chat-widget.js -->
-    <script src="chat-widget.js"></script>
+  <!-- 1. 先載入產品 -->
+  <script>
+    async function loadProducts() {
+      try {
+        const res = await fetch('https://fakestoreapi.com/products?limit=8');
+        const prods = await res.json();
+        const container = document.getElementById('products-container');
+        container.innerHTML = '<div class="products-grid">' +
+          prods.map(p=>`
+            <div class="product-card">
+              <img src="${p.image}" alt="${p.title}" class="product-image">
+              <div class="product-info">
+                <h3 class="product-title">${p.title}</h3>
+                <div class="product-price">$${p.price.toFixed(2)}</div>
+                <div class="product-rating">
+                  ${'⭐'.repeat(Math.round(p.rating.rate))} ${p.rating.rate}/5 (${p.rating.count})
+                </div>
+                <a href="product.html?id=${p.id}" class="btn-primary">View Details</a>
+              </div>
+            </div>
+          `).join('') +
+        '</div>';
+      } catch (e) {
+        document.getElementById('products-container').innerHTML =
+          '<p style="text-align:center;color:#666;">Error loading products.</p>';
+      }
+    }
+    document.addEventListener('DOMContentLoaded', loadProducts);
+  </script>
+
+  <!-- 2. 載入 marked，再載入 chat-widget.js -->
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+  <script src="chat-widget.js"></script>
+</body>
+</html>
