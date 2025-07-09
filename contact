@@ -60,15 +60,14 @@
     </div>
   </main>
 
-  <!-- Footer & Chat Widget -->
+  <!-- Footer -->
   <footer>
     <div class="container">
       <p>&copy; 2024 Demo Store. All rights reserved.</p>
     </div>
   </footer>
 
-  <button id="chat-widget-button">💬</button>
-  <div id="chat-widget-container"></div>
+  <!-- Chat Widget -->
   <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
   <script src="chat-widget.js"></script>
 </body>
