@@ -42,7 +42,7 @@
 
     <div class="faq-item">
       <h2>Q1: How do I place an order?</h2>
-      <p>To place an order, browse our product pages and click “Add to Cart.” When you’re ready, click the cart icon and follow the checkout steps, entering shipping & payment details.</p>
+      <p>To place an order, browse our product pages and click "Add to Cart." When you're ready, click the cart icon and follow the checkout steps, entering shipping & payment details.</p>
     </div>
 
     <div class="faq-item">
@@ -52,7 +52,7 @@
 
     <div class="faq-item">
       <h2>Q3: Can I track my shipment?</h2>
-      <p>Yes. After your order ships, you’ll receive an email with a tracking number. Use that on the carrier’s website or our “Order Status” page to track progress.</p>
+      <p>Yes. After your order ships, you'll receive an email with a tracking number. Use that on the carrier's website or our "Order Status" page to track progress.</p>
     </div>
 
     <div class="faq-item">
@@ -73,8 +73,6 @@
   </footer>
 
   <!-- Chat Widget -->
-  <button id="chat-widget-button">💬</button>
-  <div id="chat-widget-container"></div>
   <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
   <script src="chat-widget.js"></script>
 </body>
