@@ -100,7 +100,16 @@
           padding: 10px 14px; border-radius: 16px 16px 16px 4px;
           display: inline-block; max-width: 85%;
         }
-        .bot-message a { color: #fff; text-decoration: underline; }
+        /* 修復連結樣式 */
+        .bot-message a { 
+          color: #fff !important; 
+          text-decoration: underline !important;
+          font-weight: 500;
+        }
+        .bot-message a:hover {
+          color: #e3f2fd !important;
+          text-decoration: none !important;
+        }
         
         /* 修復圖片顯示問題 */
         .bot-message img {
@@ -207,14 +216,51 @@
       document.getElementById('__loading')?.remove();
 
       const reply = data.output || data.response || data.text || '抱歉，出錯了。';
-      // 直接把 HTML 或 Markdown 解析放進去
-      if (reply.includes('<div') || reply.includes('<img') || reply.includes('<p>')) {
-        appendMessage('bot', reply);
-      } else if (typeof marked !== 'undefined') {
-        appendMessage('bot', marked.parse(reply));
-      } else {
-        appendMessage('bot', reply);
+      
+      // 處理連結格式 - 確保 Markdown 連結正確轉換
+      let processedReply = reply;
+      
+      // 如果回覆包含 Markdown 連結格式 [text](url)
+      if (reply.includes('[') && reply.includes('](')) {
+        // 確保連結在新視窗開啟
+        if (typeof marked !== 'undefined') {
+          // 設定 marked 選項，讓連結在新視窗開啟
+          marked.setOptions({
+            breaks: true,
+            gfm: true
+          });
+          processedReply = marked.parse(reply);
+          // 將所有連結改為在新視窗開啟
+          processedReply = processedReply.replace(/<a /g, '<a target="_blank" ');
+        }
       }
+      // 如果已經是 HTML 格式
+      else if (reply.includes('<div') || reply.includes('<img') || reply.includes('<p>') || reply.includes('<a')) {
+        processedReply = reply;
+        // 確保連結在新視窗開啟
+        processedReply = processedReply.replace(/<a /g, '<a target="_blank" ');
+      }
+      // 純文字但包含 URL
+      else if (reply.includes('http://') || reply.includes('https://')) {
+        if (typeof marked !== 'undefined') {
+          processedReply = marked.parse(reply);
+          processedReply = processedReply.replace(/<a /g, '<a target="_blank" ');
+        } else {
+          // 簡單的 URL 自動連結
+          processedReply = reply.replace(
+            /(https?:\/\/[^\s]+)/g, 
+            '<a href="$1" target="_blank">$1</a>'
+          );
+        }
+      }
+      // 其他情況
+      else {
+        if (typeof marked !== 'undefined') {
+          processedReply = marked.parse(reply);
+        }
+      }
+      
+      appendMessage('bot', processedReply);
     } catch (e) {
       document.getElementById('__loading')?.remove();
       appendMessage('bot', '連線失敗，請稍後再試。');
