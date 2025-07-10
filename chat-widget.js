@@ -36,7 +36,13 @@
     if (!bodyEl) return;
     const wrapper = document.createElement('div');
     wrapper.className = (role === 'user' ? 'user-message chat-message' : 'bot-message chat-message');
-    wrapper.innerHTML = `<div>${contentHtml}</div>`;
+    
+    if (role === 'user') {
+      wrapper.innerHTML = `<span>${contentHtml}</span>`;
+    } else {
+      wrapper.innerHTML = `<div>${contentHtml}</div>`;
+    }
+    
     bodyEl.appendChild(wrapper);
     bodyEl.scrollTop = bodyEl.scrollHeight;
 
@@ -74,15 +80,74 @@
       document.body.appendChild(container);
     }
 
+    // 添加樣式（這是關鍵！）
+    if (!document.getElementById('chat-widget-styles')) {
+      const style = document.createElement('style');
+      style.id = 'chat-widget-styles';
+      style.textContent = `
+        #chat-widget-button:hover { transform: scale(1.1); box-shadow: 0 6px 15px rgba(0,0,0,0.4); }
+        #chat-widget-send:hover { background: #6b3fd4; }
+        .chat-message { margin: 8px 0; }
+        .user-message { text-align: right; }
+        .user-message span { 
+          background: #e3f2fd; color: #333;
+          padding: 8px 12px; border-radius: 16px 16px 4px 16px;
+          display: inline-block; max-width: 80%;
+        }
+        .bot-message { text-align: left; }
+        .bot-message > div { 
+          background: #854fff; color: white;
+          padding: 10px 14px; border-radius: 16px 16px 16px 4px;
+          display: inline-block; max-width: 85%;
+        }
+        .bot-message a { color: #fff; text-decoration: underline; }
+        
+        /* 修復圖片顯示問題 */
+        .bot-message img {
+          max-width: 100%;
+          max-height: 200px;
+          height: auto;
+          display: block;
+          margin: 8px 0;
+          border-radius: 8px;
+          object-fit: contain;
+        }
+        
+        /* 確保圖片在對話框內正確顯示 */
+        .bot-message > div img {
+          max-width: 100% !important;
+          height: auto !important;
+        }
+        
+        /* 如果是產品卡片中的圖片，使用更小的尺寸 */
+        .bot-message .product-card img,
+        .bot-message div[style*="display: flex"] img {
+          max-width: 80px;
+          max-height: 80px;
+          width: 80px;
+          height: 80px;
+          margin: 0;
+        }
+      `;
+      document.head.appendChild(style);
+    }
+
     // b) 重建舊訊息
     const history = loadHistory();
+    const bodyEl = document.getElementById('chat-widget-body');
+    bodyEl.innerHTML = ''; // 清空再載入
+    
     if (history.length) {
-      const bodyEl = document.getElementById('chat-widget-body');
-      bodyEl.innerHTML = ''; // 清空再載入
       history.forEach(item => {
         const div = document.createElement('div');
         div.className = (item.role === 'user' ? 'user-message chat-message' : 'bot-message chat-message');
-        div.innerHTML = `<div>${item.html}</div>`;
+        
+        if (item.role === 'user') {
+          div.innerHTML = `<span>${item.html}</span>`;
+        } else {
+          div.innerHTML = `<div>${item.html}</div>`;
+        }
+        
         bodyEl.appendChild(div);
       });
       bodyEl.scrollTop = bodyEl.scrollHeight;
@@ -110,8 +175,10 @@
     const inputEl = document.getElementById('chat-widget-input');
     const msg = inputEl.value.trim();
     if (!msg) return;
-    // 顯示使用者訊息
-    appendMessage('user', msg);
+    
+    // 顯示使用者訊息（HTML 轉義）
+    const escapedMsg = msg.replace(/</g, '&lt;').replace(/>/g, '&gt;');
+    appendMessage('user', escapedMsg);
 
     // 顯示 Loading
     const bodyEl = document.getElementById('chat-widget-body');
@@ -141,7 +208,7 @@
 
       const reply = data.output || data.response || data.text || '抱歉，出錯了。';
       // 直接把 HTML 或 Markdown 解析放進去
-      if (reply.includes('<') && reply.includes('>')) {
+      if (reply.includes('<div') || reply.includes('<img') || reply.includes('<p>')) {
         appendMessage('bot', reply);
       } else if (typeof marked !== 'undefined') {
         appendMessage('bot', marked.parse(reply));
